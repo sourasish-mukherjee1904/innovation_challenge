@@ -1,0 +1,18 @@
+{
+    "symptoms": "fever, shortness of breath",
+    "age": 21,
+    "gender": "M",
+    "season": "Summer",
+    "comorbidity": "nan",
+    "smoking_status": "Never",
+    "alcohol_use": "nan",
+    "bmi": 23.8,
+    "suggested_disease": "Chronic Respiratory Disease",
+    "matched_symptoms": [
+        "fever",
+        "shortness of breath"
+    ],
+    "match_count": 2,
+    "match_ratio": 0.25,
+    "suggested_treatment": "Smoking cessation, inhalers and rehab."
+}
