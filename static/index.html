@@ -30,10 +30,43 @@
         <main class="main-content">
             <!-- STEP 1: PATIENT ONBOARDING -->
             <section id="onboarding-step" class="card step-section active">
-                <div class="step-header">
-                    <h2>Patient Onboarding</h2>
-                    <p>Please enter the patient demographics and lifestyle profile to begin clinical assessment.</p>
+                <!-- HERO SECTION -->
+                <div class="hero-section">
+                    <h1 class="hero-title">CareTriage AI</h1>
+                    <p class="hero-subtitle">Offline-First AI Clinical Triage System specifically designed for rural and remote Indian healthcare networks.</p>
+                    <button type="button" class="hero-cta" id="btn-scroll-to-form">
+                        <i class="fa-solid fa-stethoscope"></i> Start Patient Screening
+                    </button>
                 </div>
+
+                <!-- BENEFITS SECTION -->
+                <div class="benefits-section">
+                    <h3 class="section-label">How It Helps Rural Health Networks</h3>
+                    <div class="benefits-grid">
+                        <div class="benefit-card">
+                            <i class="fa-solid fa-shield-halved benefit-icon"></i>
+                            <h4>ASHA Worker Companion</h4>
+                            <p>Assists local health workers during home visits with structured digital records.</p>
+                        </div>
+                        <div class="benefit-card">
+                            <i class="fa-solid fa-wifi-slash benefit-icon"></i>
+                            <h4>Offline-First Triage</h4>
+                            <p>Engineered to operate seamlessly without reliable internet connectivity.</p>
+                        </div>
+                        <div class="benefit-card">
+                            <i class="fa-solid fa-comments benefit-icon"></i>
+                            <h4>Simplified Chat Flow</h4>
+                            <p>A short, 3-question adaptive clinical interview to quickly categorize risk.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ONBOARDING FORM HEADER -->
+                <div class="onboarding-form-header" id="form-scroll-target">
+                    <h3><i class="fa-solid fa-user-plus"></i> Patient Demographic & Lifestyle Intake</h3>
+                    <p class="hero-subtitle" style="margin: 0; text-align: left; font-size: 13px; max-width: 100%;">Complete the demographic profile below to start the symptom check.</p>
+                </div>
+
                 <form id="onboarding-form" class="form-grid">
                     <div class="form-group">
                         <label for="age"><i class="fa-solid fa-calendar-day"></i> Age: <span id="age-val" class="slider-badge">30</span> Years</label>

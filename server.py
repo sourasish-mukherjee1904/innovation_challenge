@@ -60,7 +60,7 @@ def start_session():
             "bot": bot,
             "patient_context": patient_context,
             "turn_count": 0,
-            "max_turns": 12
+            "max_turns": 3
         }
         
         # First greeting/question from LLM

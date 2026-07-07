@@ -34,6 +34,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const resSymptoms = document.getElementById('res-symptoms');
     const resTreatment = document.getElementById('res-treatment');
 
+    // Smooth Scroll to Form
+    const btnScrollToForm = document.getElementById('btn-scroll-to-form');
+    const formTarget = document.getElementById('form-scroll-target');
+    if (btnScrollToForm && formTarget) {
+        btnScrollToForm.addEventListener('click', () => {
+            formTarget.scrollIntoView({ behavior: 'smooth' });
+        });
+    }
+
     // Range Sliders Event Listeners
     const ageInput = document.getElementById('age');
     const ageVal = document.getElementById('age-val');
