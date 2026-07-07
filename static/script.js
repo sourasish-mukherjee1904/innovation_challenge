@@ -34,6 +34,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const resSymptoms = document.getElementById('res-symptoms');
     const resTreatment = document.getElementById('res-treatment');
 
+    // Range Sliders Event Listeners
+    const ageInput = document.getElementById('age');
+    const ageVal = document.getElementById('age-val');
+    ageInput.addEventListener('input', () => { ageVal.textContent = ageInput.value; });
+
+    const heightInput = document.getElementById('height');
+    const heightVal = document.getElementById('height-val');
+    heightInput.addEventListener('input', () => { heightVal.textContent = heightInput.value; });
+
+    const weightInput = document.getElementById('weight');
+    const weightVal = document.getElementById('weight-val');
+    weightInput.addEventListener('input', () => { weightVal.textContent = parseFloat(weightInput.value).toFixed(1); });
+
     // Onboarding Form Submit
     onboardingForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -168,6 +181,9 @@ document.addEventListener('DOMContentLoaded', () => {
         sessionId = null;
         patientContext = null;
         onboardingForm.reset();
+        ageVal.textContent = "30";
+        heightVal.textContent = "165";
+        weightVal.textContent = "60.0";
         btnManualDone.disabled = false;
         switchStep(resultStep, onboardingStep);
     });
