@@ -1,15 +1,15 @@
 {
-    "age": 30,
-    "gender": "Female",
+    "age": 32,
+    "gender": "Male",
     "season": "Summer",
     "comorbidity": "nan",
     "smoking_status": "Never",
-    "alcohol_use": "nan",
-    "bmi": 22.0,
-    "symptoms": "abdominal pain",
+    "alcohol_use": "Occasional",
+    "bmi": 23.2,
+    "symptoms": "fever",
     "suggested_disease": "Diarrheal Disease",
     "matched_symptoms": [
-        "abdominal pain"
+        "fever"
     ],
     "match_count": 1,
     "match_ratio": 0.143,

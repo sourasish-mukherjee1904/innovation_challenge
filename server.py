@@ -171,7 +171,7 @@ def process_final_diagnosis(session_id, patient_data, final_reply):
         
         # Ensure outputs folder exists
         os.makedirs("outputs", exist_ok=True)
-        with open("outputs/patient.json", "w") as f:
+        with open(".patient.json", "w") as f:
             json.dump(patient_data, f, indent=4)
             
         # Clean up session
