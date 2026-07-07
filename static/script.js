@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // State Variables
     let sessionId = null;
     let patientContext = null;
-    const API_BASE = window.location.protocol === 'file:' ? 'http://127.0.0.1:5000' : '';
+    const API_BASE = window.location.port !== '5000' ? 'http://127.0.0.1:5000' : '';
 
     // DOM Elements
     const onboardingStep = document.getElementById('onboarding-step');
