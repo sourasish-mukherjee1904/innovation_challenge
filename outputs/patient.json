@@ -1,18 +1,17 @@
 {
-    "symptoms": "fever, shortness of breath",
-    "age": 21,
-    "gender": "M",
+    "age": 32,
+    "gender": "Male",
     "season": "Summer",
     "comorbidity": "nan",
     "smoking_status": "Never",
-    "alcohol_use": "nan",
-    "bmi": 23.8,
-    "suggested_disease": "Chronic Respiratory Disease",
+    "alcohol_use": "Occasional",
+    "bmi": 23.2,
+    "symptoms": "fever",
+    "suggested_disease": "Diarrheal Disease",
     "matched_symptoms": [
-        "fever",
-        "shortness of breath"
+        "fever"
     ],
-    "match_count": 2,
-    "match_ratio": 0.25,
-    "suggested_treatment": "Smoking cessation, inhalers and rehab."
+    "match_count": 1,
+    "match_ratio": 0.143,
+    "suggested_treatment": "ORS, Zinc for children, fluids if severe."
 }

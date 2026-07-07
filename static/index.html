@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Health Intake & Triage Assistant</title>
+    <meta name="description" content="A telehealth assistant for onboarding patients, conducting symptom interviews, and predicting health conditions.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo">
+                <i class="fa-solid fa-heart-pulse logo-icon"></i>
+                <span class="logo-text">Health<span>Triage</span></span>
+            </div>
+            <div class="system-status">
+                <span class="status-indicator online"></span>
+                <span class="status-text">AI Diagnostics Active</span>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- STEP 1: PATIENT ONBOARDING -->
+            <section id="onboarding-step" class="card step-section active">
+                <div class="step-header">
+                    <h2>Patient Onboarding</h2>
+                    <p>Please enter the patient demographics and lifestyle profile to begin clinical assessment.</p>
+                </div>
+                <form id="onboarding-form" class="form-grid">
+                    <div class="form-group">
+                        <label for="age"><i class="fa-solid fa-calendar-day"></i> Age (Years)</label>
+                        <input type="number" id="age" name="age" required min="1" max="120" placeholder="e.g., 28">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="gender"><i class="fa-solid fa-venus-mars"></i> Gender</label>
+                        <select id="gender" name="gender" required>
+                            <option value="" disabled selected>Select gender</option>
+                            <option value="Female">Female</option>
+                            <option value="Male">Male</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="height"><i class="fa-solid fa-ruler-vertical"></i> Height (cm)</label>
+                        <input type="number" id="height" name="height" required min="30" max="250" placeholder="e.g., 175">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="weight"><i class="fa-solid fa-weight-scale"></i> Weight (kg)</label>
+                        <input type="number" id="weight" name="weight" step="0.1" required min="2" max="500" placeholder="e.g., 70">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="comorbidity"><i class="fa-solid fa-notes-medical"></i> Comorbidity</label>
+                        <select id="comorbidity" name="comorbidity">
+                            <option value="nan">None</option>
+                            <option value="Diabetes">Diabetes</option>
+                            <option value="Hypertension">Hypertension</option>
+                            <option value="Heart Disease">Heart Disease</option>
+                            <option value="Kidney Disease">Kidney Disease</option>
+                            <option value="Obesity">Obesity</option>
+                            <option value="Multiple">Multiple Comorbidities</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="smoking_status"><i class="fa-solid fa-smoking"></i> Smoking Status</label>
+                        <select id="smoking_status" name="smoking_status">
+                            <option value="Never">Never Smoked</option>
+                            <option value="Former">Former Smoker</option>
+                            <option value="Current">Current Smoker</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="alcohol_use"><i class="fa-solid fa-beer-mug-empty"></i> Alcohol Use</label>
+                        <select id="alcohol_use" name="alcohol_use">
+                            <option value="nan">None / Not Asked</option>
+                            <option value="Occasional">Occasional</option>
+                            <option value="Regular">Regular</option>
+                            <option value="Heavy">Heavy</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary full-width" id="btn-start">
+                        <span>Begin Clinical Assessment</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </form>
+            </section>
+
+            <!-- STEP 2: CHAT INTERVIEW -->
+            <section id="chat-step" class="card step-section">
+                <div class="chat-container">
+                    <div class="chat-header-bar">
+                        <div class="doctor-profile">
+                            <div class="avatar">
+                                <i class="fa-solid fa-user-doctor"></i>
+                            </div>
+                            <div class="profile-info">
+                                <h3>Symptom Intake Assistant</h3>
+                                <p>Conversational AI Nurse</p>
+                            </div>
+                        </div>
+                        <button class="btn btn-secondary btn-small" id="btn-manual-done">
+                            <i class="fa-solid fa-circle-check"></i> Complete
+                        </button>
+                    </div>
+
+                    <div class="chat-messages" id="chat-messages">
+                        <!-- Messages dynamically inserted here -->
+                    </div>
+
+                    <div class="typing-indicator" id="typing-indicator">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+
+                    <form id="chat-form" class="chat-input-area">
+                        <input type="text" id="chat-input" placeholder="Describe symptoms or reply here..." required autocomplete="off">
+                        <button type="submit" class="btn btn-send" id="btn-send">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- STEP 3: ASSESSMENT RESULTS -->
+            <section id="result-step" class="card step-section">
+                <div class="step-header text-center">
+                    <div class="success-icon-wrap animate-pulse">
+                        <i class="fa-solid fa-heart-circle-check"></i>
+                    </div>
+                    <h2>Clinical Assessment Report</h2>
+                    <p>Machine Learning & AI synthesis based on demographic indicators and symptom profiling.</p>
+                </div>
+
+                <div class="results-grid">
+                    <!-- Column 1: Patient Summary Info -->
+                    <div class="results-card patient-summary">
+                        <h3><i class="fa-solid fa-user"></i> Patient Profile</h3>
+                        <div class="summary-details">
+                            <div class="detail-row">
+                                <span class="label">Age:</span>
+                                <span class="val" id="res-age">-</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="label">Gender:</span>
+                                <span class="val" id="res-gender">-</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="label">BMI:</span>
+                                <span class="val" id="res-bmi">-</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="label">Season:</span>
+                                <span class="val" id="res-season">-</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="label">Comorbidities:</span>
+                                <span class="val" id="res-comorbidity">-</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="label">Smoking Status:</span>
+                                <span class="val" id="res-smoking">-</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="label">Alcohol Use:</span>
+                                <span class="val" id="res-alcohol">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Diagnosis and Recommendations -->
+                    <div class="results-card diagnosis-details">
+                        <h3><i class="fa-solid fa-stethoscope"></i> AI Diagnosis & Triage</h3>
+                        
+                        <div class="prediction-highlight">
+                            <span class="prediction-label">Primary Suspected Disease</span>
+                            <div class="disease-name" id="res-disease">Calculating...</div>
+                            <div class="match-ratio-bar">
+                                <div class="bar-fill" id="res-match-fill" style="width: 0%"></div>
+                            </div>
+                            <div class="match-meta">
+                                <span id="res-match-count">Matched symptoms: 0</span>
+                                <span id="res-match-ratio">Confidence: 0.00%</span>
+                            </div>
+                        </div>
+
+                        <div class="result-block">
+                            <h4>Reported Symptoms</h4>
+                            <p class="symptoms-list" id="res-symptoms">None</p>
+                        </div>
+
+                        <div class="result-block treatment-box">
+                            <h4><i class="fa-solid fa-hand-holding-medical"></i> Suggested Treatment Path</h4>
+                            <p id="res-treatment">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-bar">
+                    <button class="btn btn-secondary" id="btn-restart">
+                        <i class="fa-solid fa-rotate-left"></i> Start New Intake
+                    </button>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

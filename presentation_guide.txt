@@ -1,0 +1,78 @@
+================================================================================
+           TECHNICAL GUIDE & PRESENTATION DECK: RURAL HEALTH TRIAGE
+       Offline-First AI Health Triage for Grassroots Indian Healthcare
+================================================================================
+
+This document is a technical, direct, and actionable guide explaining what we 
+have built, the technologies used, and how it directly impacts rural Indian healthcare.
+
+--------------------------------------------------------------------------------
+1. THE PROBLEM: LAST-MILE MEDICAL ACCESS IN RURAL INDIA
+--------------------------------------------------------------------------------
+* Absence of Early Triage: Rural patients delay seeking treatment because they 
+  cannot gauge severity, leading to fatal delays or crowded Primary Health Centres (PHCs).
+* High Literacy & Tech Barriers: Existing apps require typing and high-speed internet.
+* Last-Mile Hurdles: High dependence on internet connectivity and lack of support 
+  for regional languages.
+
+--------------------------------------------------------------------------------
+2. THE SOLUTION: HYBRID CLINICAL TRIAGE SYSTEM
+--------------------------------------------------------------------------------
+* Instead of diagnosing, the system outputs: Risk Levels (Low, Moderate, High) 
+  and clear next steps (Home care, PHC visit, or Immediate hospital transfer).
+* Two Deployment Interfaces:
+  1. Primary Interface: Autonomous Voice-Driven Health Kiosk (Raspberry Pi based, 
+     placed in village Panchayats, interacting via regional languages like Hindi/Bengali).
+  2. Companion Interface: Lightweight Mobile App for ASHA (Accredited Social Health Activist) 
+     workers to screen patients in rural households offline.
+
+--------------------------------------------------------------------------------
+3. THE TECHNICAL IMPLEMENTATION: WHAT WE HAVE BUILT
+--------------------------------------------------------------------------------
+We built a working hybrid prototype combining web interfaces, lightweight local ML, 
+and resilient API fallbacks.
+
+* Frontend Client Dashboard:
+  - Demographic Onboarding: Gathers age, gender, height/weight (BMI), comorbidities, 
+    and lifestyle details (smoking/alcohol status).
+  - Triage Chat Room: Interactive, glassmorphic conversational chat representing the 
+    clinical interview.
+  - Diagnostic Report: Live confidence progress bars, matched symptoms, and suggested treatments.
+
+* Backend Orchestrator (Flask Server):
+  - Manages active session states, parses demographics, and computes metrics (BMI/Season).
+  - Hosts API endpoints: `/api/start-session`, `/api/chat`, and `/api/finalize`.
+
+* Resilient Dual-LLM Conversational Layer:
+  - Primary (Ollama Llama 3.1:8b): Runs locally on the client/edge machine for offline use 
+    and complete data privacy.
+  - Secondary Fallback (Groq API - Llama 3.3 70B): Instantly takes over if local Ollama 
+    is offline, returning responses under 1 second.
+  - Last-Resort Heuristic Parser: Runs basic keyword NLP matching if both servers fail, 
+    preventing any service downtime.
+
+* Machine Learning Risk Predictor:
+  - Powered by CatBoost Classifier (`disease_prediction_model.cbm`) running locally on 
+    the backend.
+  - Maps extracted symptoms to standard clinical features to compute disease risk 
+    likelihood and suggested treatments.
+
+--------------------------------------------------------------------------------
+4. PILOT METRICS & SUCCESS CRITERIA
+--------------------------------------------------------------------------------
+Success is measured by direct clinical utility:
+* Triage Accuracy: ≥85% agreement with clinical practitioners.
+* False-Negative Rate: <5% (High-risk cases must never be misclassified as low-risk).
+* System Uptime: ≥95% availability under offline-primary field conditions.
+* ASHA Worker Adoption: ≥80% of active health workers completing ≥10 interactions.
+
+--------------------------------------------------------------------------------
+5. REGULATORY & CLINICAL SAFETY (CDSCO & GOVERNANCE)
+--------------------------------------------------------------------------------
+* Clinical Co-Design: Triage logic and ML outputs are designed alongside medical 
+  professionals to guarantee interpretability and safety.
+* Indian Regulatory Compliance: Built with awareness of CDSCO (Central Drugs Standard 
+  Control Organisation) requirements for medical device software in India.
+* Research-First Governance: Pilot trials will be governed as research studies rather 
+  than open services to ensure strict clinical oversight.
+================================================================================

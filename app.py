@@ -274,32 +274,65 @@ def finalize_symptoms(bot, patient_context):
     return patient_data, reply
 
 
-patient_context = collect_patient_context()
-bot = HealthConversation(patient_context=patient_context)
+def main_cli():
+    patient_context = collect_patient_context()
+    bot = HealthConversation(patient_context=patient_context)
 
-user_input = "Begin the symptom interview. Ask only about the patient's current symptoms."
-turn_count = 0
-max_symptom_turns = 12
+    user_input = "Begin the symptom interview. Ask only about the patient's current symptoms."
+    turn_count = 0
+    max_symptom_turns = 12
 
-print("========== AI Health Assistant ==========\n")
-print("Type 'done' when the symptom interview is complete.")
+    print("========== AI Health Assistant ==========\n")
+    print("Type 'done' when the symptom interview is complete.")
 
-while True:
+    while True:
 
-    if user_input.strip().lower() in {"done", "finish", "stop", "no more"}:
+        if user_input.strip().lower() in {"done", "finish", "stop", "no more"}:
 
-        patient_data, final_reply = finalize_symptoms(bot, patient_context)
+            patient_data, final_reply = finalize_symptoms(bot, patient_context)
 
-        if patient_data is not None:
+            if patient_data is not None:
 
-            patient_data = normalize_patient_symptoms(patient_data)
+                patient_data = normalize_patient_symptoms(patient_data)
+
+                print("\nDoctor:")
+                print(final_reply)
+
+                print("\n========== Patient Data ==========")
+
+                print("\nPatient Information\n")
+
+                print(json.dumps(patient_data, indent=4))
+                patient_data = add_treatment_suggestion(patient_data)
+                with open("outputs/patient.json", "w") as f:
+                    json.dump(patient_data, f, indent=4)
+
+                break
 
             print("\nDoctor:")
             print(final_reply)
 
-            print("\n========== Patient Data ==========")
+            print("\nThe model did not return JSON yet. Please type 'done' again or provide one more symptom detail.")
 
+            user_input = input("\nYou: ")
+
+            continue
+
+        reply = bot.chat(user_input)
+
+        
+        patient_data = extract_json(reply)
+
+        if patient_data is not None:
+
+            patient_data = {**patient_data, **patient_context}
+            patient_data = normalize_patient_symptoms(patient_data)
+
+            print("\n========== Patient Data ==========\n")
+
+            
             print("\nPatient Information\n")
+            
 
             print(json.dumps(patient_data, indent=4))
             patient_data = add_treatment_suggestion(patient_data)
@@ -309,50 +342,22 @@ while True:
             break
 
         print("\nDoctor:")
-        print(final_reply)
+        print(reply)
 
-        print("\nThe model did not return JSON yet. Please type 'done' again or provide one more symptom detail.")
+        turn_count += 1
+
+        if turn_count >= max_symptom_turns:
+
+            print("\nSymptom interview limit reached. Finalizing now.")
+
+            user_input = "done"
+
+            continue
 
         user_input = input("\nYou: ")
 
-        continue
+    print("\nConversation Finished.")
 
-    reply = bot.chat(user_input)
 
-    
-    patient_data = extract_json(reply)
-
-    if patient_data is not None:
-
-        patient_data = {**patient_data, **patient_context}
-        patient_data = normalize_patient_symptoms(patient_data)
-
-        print("\n========== Patient Data ==========\n")
-
-        
-        print("\nPatient Information\n")
-        
-
-        print(json.dumps(patient_data, indent=4))
-        patient_data = add_treatment_suggestion(patient_data)
-        with open("outputs/patient.json", "w") as f:
-            json.dump(patient_data, f, indent=4)
-
-        break
-
-    print("\nDoctor:")
-    print(reply)
-
-    turn_count += 1
-
-    if turn_count >= max_symptom_turns:
-
-        print("\nSymptom interview limit reached. Finalizing now.")
-
-        user_input = "done"
-
-        continue
-
-    user_input = input("\nYou: ")
-
-print("\nConversation Finished.")
+if __name__ == "__main__":
+    main_cli()
