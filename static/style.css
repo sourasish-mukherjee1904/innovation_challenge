@@ -34,15 +34,14 @@ body {
     background: linear-gradient(135deg, #e0f2fe 0%, #f1f5f9 50%, #ccfbf1 100%);
     color: var(--text-primary);
     min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
+    display: block;
+    padding: 0;
 }
 
 .app-container {
     width: 100%;
-    max-width: 900px;
+    max-width: 1000px;
+    margin: 40px auto;
     background: var(--card-bg);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
@@ -51,9 +50,9 @@ body {
     box-shadow: var(--shadow);
     display: flex;
     flex-direction: column;
-    overflow: hidden;
-    height: 85vh;
-    min-height: 600px;
+    overflow: visible;
+    height: auto;
+    min-height: auto;
     transition: var(--transition);
 }
 
@@ -125,7 +124,7 @@ body {
 /* Main Content */
 .main-content {
     flex: 1;
-    overflow-y: auto;
+    overflow-y: visible;
     position: relative;
 }
 
@@ -755,6 +754,55 @@ input:focus, select:focus {
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+/* Quick Replies */
+.quick-reply-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 15px 0;
+    border-top: 1px solid var(--border-color);
+}
+
+.quick-reply-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.quick-reply-label i {
+    color: var(--accent);
+}
+
+.quick-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.chip-btn {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.chip-btn:hover {
+    background-color: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    transform: translateY(-1px);
 }
 
 /* Responsive adjustments */

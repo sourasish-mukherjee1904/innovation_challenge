@@ -107,16 +107,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Chat Form Submit
-    chatForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const msg = chatInput.value.trim();
+    // Message Sender Helper
+    async function handleUserMessage(msg) {
         if (!msg) return;
 
-        chatInput.value = '';
         appendMessage('user', msg);
-
-        // Show typing indicator
         showTyping(true);
 
         try {
@@ -131,7 +126,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (data.success) {
                 if (data.finished) {
-                    // Show final report
                     showResults(data.patient_data, data.message);
                 } else {
                     appendMessage('bot', data.message);
@@ -147,7 +141,27 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('API Error:', error);
             appendMessage('bot', 'Failed to communicate with server.');
         }
+    }
+
+    // Chat Form Submit
+    chatForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const msg = chatInput.value.trim();
+        if (!msg) return;
+        chatInput.value = '';
+        await handleUserMessage(msg);
     });
+
+    // Quick Chips Click Event Delegation
+    const quickChips = document.getElementById('quick-chips');
+    if (quickChips) {
+        quickChips.addEventListener('click', async (e) => {
+            const btn = e.target.closest('.chip-btn');
+            if (!btn) return;
+            const msg = btn.getAttribute('data-val');
+            await handleUserMessage(msg);
+        });
+    }
 
     // Manual Done Button Click
     btnManualDone.addEventListener('click', async () => {
