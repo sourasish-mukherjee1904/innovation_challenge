@@ -100,34 +100,35 @@ This is the day-to-day workflow for a village health worker (ASHA or ANM) utiliz
 ### The Training Dataset (Kaggle Source & Scales)
 *   **Source:** `dhivyeshrk/diseases-and-symptoms-dataset` from Kaggle.
 *   **Scale:** **246,945 patient profiles** with **377 raw binary symptoms** covering **773 unique diseases**.
-*   **Relevance Mapping:** The 773 specific pathologies were mapped into the ASHA kiosk's **12 primary clinical categories** (focusing on rural vector-borne, metabolic, cardiorenal, and respiratory diseases).
-*   **Filtered Data Subset:** This mapping filters the dataset to **16,569 high-relevance rows** matching the target classes.
+*   **Relevance Mapping:** The 773 specific pathologies were mapped into the ASHA kiosk's **12 target diseases (classes)** of interest (focusing on rural vector-borne, metabolic, cardiorenal, and respiratory diseases).
+*   **Filtered Data Subset:** This mapping filters the dataset to **16,569 high-relevance rows** matching the 12 target classes.
 
-### Feature Space Mapping
+### Feature Space Mapping & Generalization Safeguards
 *   **Symptom Mappings:** The 377 raw Kaggle binary features are grouped and mapped into the kiosk's **44 canonical symptoms** (e.g. mapping `sharp abdominal pain`, `lower abdominal pain`, `burning abdominal pain`, and `upper abdominal pain` into a single `abdominal pain` flag).
-*   **Demographic Alignment:** Constants/Placeholders are added for age (30), gender (F), and season (Summer) to match the inference input shape without introducing synthetic demographic bias.
+*   **Demographic Alignment:** To ensure API shape compatibility with the original frontend/backend config, demographic columns (age, gender, season) are provided. However, to prevent generalization risk (where models might rely on constant dummy training values), **the Hierarchical Random Forest models are trained exclusively on the 44 binary symptoms**, completely omitting demographics from the feature space during learning and inference.
 
 ### Hierarchical Model Configuration (Trained on Data)
-Instead of asking a single classifier to differentiate across all classes, we stack two layers of Random Forests:
-1.  **Stage 1: Category Predictor**
+Instead of classifying across all target classes at once, the system groups the 12 target diseases (classes) into **4 high-level clinical domains (categories)** using a stacked double-forest approach:
+1.  **Stage 1: Category Predictor (Domain Level)**
     *   *Algorithm:* RandomForestClassifier (n_estimators=50, max_depth=12, random_state=42)
-    *   *Task:* Classify the 44 symptoms into 4 clinical categories (Acute Infectious, Cardiorenal & Metabolic, Respiratory & Digestive, Systemic & Psychiatric).
-2.  **Stage 2: Specific Disease Predictors**
+    *   *Task:* Classify the 44 symptoms into the **4 high-level clinical categories/domains** (Acute Infectious, Cardiorenal & Metabolic, Respiratory & Digestive, Systemic & Psychiatric).
+2.  **Stage 2: Specific Disease Predictors (Class Level)**
     *   *Algorithm:* 4 separate Random Forest models (n_estimators=30, max_depth=10, random_state=42)
-    *   *Task:* Predict specific disease paths within the parent category (e.g., if Category 1 is predicted, the model selects between Hypertension, CKD, and Diabetes).
+    *   *Task:* Predict specific disease paths within the selected domain (e.g., if Cardiorenal & Metabolic is predicted, the model selects between Hypertension, CKD, and Diabetes).
 
-### Comparative Accuracy Metrics (Evaluated on 200 Random Test Samples)
-We report the metrics honestly across both models:
+### Comparative Accuracy Metrics (Apples-to-Apples Evaluation)
+*IMPORTANT: Both the baseline CatBoost model and the Hierarchical Classifier were evaluated on the identical test scope (the same 12 target classes across the same 200 random samples) to guarantee a strict apples-to-apples comparison.*
 
 *   **BASELINE CATBOOST MODEL (Clean, No Multipliers/Priors):**
-    *   *Top-1 Global Accuracy:* **43.00%**
-    *   *Top-3 Global Accuracy:* **85.50%**
+    *   *Top-1 Accuracy:* **43.00%**
+    *   *Top-3 Accuracy:* **85.50%**
     *   *Limitation:* Frequently misclassifies chronic cases when acute systemic symptoms (like `loss of appetite` or `fatigue`) are present, as the model evaluates all symptoms on an equal statistical footing.
 
 *   **HIERARCHICAL CLASSIFIER MODEL (Stage 1 & Stage 2 Trained on Data):**
-    *   *Top-1 Global Accuracy:* **89.00%** (A **46.00% absolute accuracy boost**)
-    *   *Top-3 Global Accuracy:* **97.00%** (A **11.50% absolute accuracy boost**)
-    *   *Rationale:* Stage 1 successfully groups symptoms into the correct high-level category (97% accuracy), allowing Stage 2 to select the exact disease within a highly restricted candidate pool.
+    *   *Top-1 Accuracy:* **89.00%** (A **46.00% absolute accuracy boost**)
+    *   *Top-3 Accuracy:* **97.00%** (A **11.50% absolute accuracy boost**)
+    *   *Rationale:* Stage 1 successfully groups symptoms into the correct high-level clinical category (97% accuracy), allowing Stage 2 to select the exact disease within a highly restricted candidate pool.
+
 
 
 
