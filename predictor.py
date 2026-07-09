@@ -18,7 +18,19 @@ class DiseasePredictor:
         with open("models/feature_columns.pkl", "rb") as f:
             self.feature_columns = pickle.load(f)
 
+        # Load hierarchical models
+        try:
+            with open("models/hierarchical/stage1_model.pkl", "rb") as f:
+                self.hierarchical_stage1 = pickle.load(f)
+            with open("models/hierarchical/stage2_models.pkl", "rb") as f:
+                self.hierarchical_stage2 = pickle.load(f)
+            self.has_hierarchical = True
+        except Exception as e:
+            print(f"Hierarchical models not loaded: {e}")
+            self.has_hierarchical = False
+
         self.disease_dictionary = {
+
             "Respiratory Infection": {
                 "symptoms": {
                     "body ache", 
@@ -365,9 +377,7 @@ class DiseasePredictor:
     def predict_top3(self, patient):
 
         sample_df = self.prepare_input(patient)
-
         probabilities = self.model.predict_proba(sample_df)[0]
-
         classes = self.model.classes_
 
         results = sorted(
@@ -377,6 +387,50 @@ class DiseasePredictor:
         )[:3]
 
         return results
+
+    def predict_top3_hierarchical(self, patient):
+        if not self.has_hierarchical:
+            # Fallback to standard if hierarchical models are not trained/loaded
+            return self.predict_top3(patient)
+
+        # 1. Normalize symptoms
+        raw_symptoms = patient.get("symptoms", "")
+        patient_symptoms = set(self.normalize_symptoms(raw_symptoms))
+        
+        # 2. Build 44 symptoms binary vector X
+        import numpy as np
+        X = np.zeros(len(self.all_symptoms))
+        for idx, sym in enumerate(self.all_symptoms):
+            if sym in patient_symptoms:
+                X[idx] = 1.0
+                
+        # Reshape for sklearn prediction
+        X = X.reshape(1, -1)
+        
+        # 3. Predict Stage 1 categories
+        category_probs = self.hierarchical_stage1.predict_proba(X)[0] # Array of 4 probabilities
+        
+        # 4. Predict Stage 2 diseases
+        disease_probs = {}
+        
+        # Initialize all 12 target classes to 0.0
+        for cls in self.model.classes_:
+            disease_probs[cls] = 0.0
+            
+        for cat_id, sub_model in self.hierarchical_stage2.items():
+            cat_prob = category_probs[cat_id]
+            sub_classes = sub_model.classes_
+            sub_probs = sub_model.predict_proba(X)[0]
+            
+            for sub_cls, sub_p in zip(sub_classes, sub_probs):
+                disease_probs[sub_cls] = cat_prob * sub_p
+                
+        # Sort and return top 3
+        results = sorted(disease_probs.items(), key=lambda x: x[1], reverse=True)[:3]
+        return results
+
+
+
 
     def suggest_treatment(self, patient):
 
@@ -425,3 +479,62 @@ class DiseasePredictor:
             }
 
         return best_match
+
+    def triage_patient_risk(self, patient):
+        raw_symptoms = patient.get("symptoms", "")
+        normalized_symptoms = set(self.normalize_symptoms(raw_symptoms))
+        comorbidity = str(patient.get("comorbidity", "nan")).strip().lower()
+        has_comorbidity = comorbidity not in {"nan", "none", "blank", ""}
+
+        # 1. Define High-risk criteria
+        high_risk_symptoms = {"shortness of breath", "chest pain", "dehydration", "blurred vision", "numbness"}
+        
+        # 2. Define Moderate-risk criteria
+        moderate_risk_symptoms = {"high fever", "vomiting", "diarrhea", "abdominal pain", "dizziness", "swelling", "wheezing", "fever"}
+
+        # Determine level
+        if normalized_symptoms.intersection(high_risk_symptoms):
+            level = "High"
+        elif normalized_symptoms.intersection(moderate_risk_symptoms):
+            # If they have moderate symptoms AND a comorbidity, elevate to High risk
+            if has_comorbidity:
+                level = "High"
+            else:
+                level = "Moderate"
+        elif has_comorbidity and normalized_symptoms:
+            # Comorbidity present even with mild symptoms -> Moderate
+            level = "Moderate"
+        else:
+            level = "Low"
+
+        # Triage messages and actions
+        if level == "High":
+            message = "Your symptoms and patient profile indicate a potential high-risk medical condition. Urgent evaluation is required."
+            steps = (
+                "⚠️ **URGENT ACTIONS REQUIRED:**\n"
+                "1. **Seek immediate medical care** at the nearest Primary Health Centre (PHC), Community Health Centre (CHC), or emergency facility.\n"
+                "2. **Inform medical staff** of any pre-existing conditions, especially Heart Disease, Diabetes, or Kidney Disease.\n"
+                "3. **Do not travel alone**; ensure a family member or local ASHA/ANM health worker accompanies you."
+            )
+        elif level == "Moderate":
+            message = "Your symptoms and patient profile suggest a moderate concern. Clinical consultation is recommended soon."
+            steps = (
+                "⚠️ **RECOMMENDED ACTIONS:**\n"
+                "1. **Visit your local healthcare clinic** or consult with your village health worker (ASHA/ANM) within the next 24-48 hours.\n"
+                "2. **Keep hydrated** (drink clean boiled water, or ORS if experiencing diarrhea/vomiting) and rest.\n"
+                "3. **Monitor your symptoms closely**. If you develop difficulty breathing or chest pain, seek emergency care immediately."
+            )
+        else:
+            message = "Your symptoms appear mild and do not suggest immediate concern. Supportive care is advised."
+            steps = (
+                "✅ **HOME CARE & MONITORING:**\n"
+                "1. **Rest at home** and ensure adequate fluid intake (clean drinking water, juices, coconut water).\n"
+                "2. **Supportive measures:** Take paracetamol for mild body aches or fever if appropriate. Avoid taking antibiotics without a prescription.\n"
+                "3. **Watch for warning signs:** Contact your ASHA worker if your symptoms worsen or do not improve within 3 days."
+            )
+
+        return {
+            "level": level,
+            "message": message,
+            "steps": steps
+        }

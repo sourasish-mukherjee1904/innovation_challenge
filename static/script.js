@@ -257,6 +257,71 @@ document.addEventListener('DOMContentLoaded', () => {
         resSmoking.textContent = patientData.smoking_status || '-';
         resAlcohol.textContent = patientData.alcohol_use || '-';
 
+        // Render Triage Level and Actionable Steps
+        const riskLevel = patientData.risk_level || 'Low';
+        const triageBanner = document.getElementById('res-triage-banner');
+        const resRiskLevel = document.getElementById('res-risk-level');
+        const resTriageMessage = document.getElementById('res-triage-message');
+        const resActionableSteps = document.getElementById('res-actionable-steps');
+
+        resRiskLevel.textContent = riskLevel;
+        resTriageMessage.textContent = patientData.triage_message || '-';
+        resActionableSteps.textContent = patientData.actionable_steps || '-';
+
+        // Clear existing risk classes and set appropriate one
+        triageBanner.className = 'triage-banner'; // reset
+        if (riskLevel === 'High') {
+            triageBanner.classList.add('high-risk');
+        } else if (riskLevel === 'Moderate') {
+            triageBanner.classList.add('moderate-risk');
+        } else {
+            triageBanner.classList.add('low-risk');
+        }
+
+        // Render Top 3 ML Predictions
+        const resPredictionsList = document.getElementById('res-predictions-list');
+        resPredictionsList.innerHTML = ''; // Clear previous
+
+        const predictions = patientData.top3_predictions || [];
+        if (predictions.length > 0) {
+            predictions.forEach(pred => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'prediction-item';
+
+                const nameRow = document.createElement('div');
+                nameRow.className = 'prediction-name-row';
+                
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = pred.disease;
+
+                const probSpan = document.createElement('span');
+                probSpan.className = 'prediction-prob';
+                probSpan.textContent = `${(pred.probability * 100).toFixed(1)}%`;
+
+                nameRow.appendChild(nameSpan);
+                nameRow.appendChild(probSpan);
+
+                const barBg = document.createElement('div');
+                barBg.className = 'prediction-bar-bg';
+
+                const barFill = document.createElement('div');
+                barFill.className = 'prediction-bar-fill';
+                // Trigger animation with a slight timeout so transition takes effect
+                setTimeout(() => {
+                    barFill.style.width = `${(pred.probability * 100).toFixed(1)}%`;
+                }, 50);
+                barFill.style.width = '0%'; // initial state
+
+                barBg.appendChild(barFill);
+
+                itemDiv.appendChild(nameRow);
+                itemDiv.appendChild(barBg);
+                resPredictionsList.appendChild(itemDiv);
+            });
+        } else {
+            resPredictionsList.textContent = 'No predictions available from ML model.';
+        }
+
         // Fill Diagnosis & Prediction results
         resDisease.textContent = patientData.suggested_disease || 'Unknown';
         
@@ -271,4 +336,5 @@ document.addEventListener('DOMContentLoaded', () => {
         resSymptoms.textContent = patientData.symptoms || 'None';
         resTreatment.textContent = patientData.suggested_treatment || 'No specific treatment guidelines matching inputs.';
     }
+
 });

@@ -179,6 +179,7 @@ def normalize_patient_symptoms(patient_data):
 
 def add_treatment_suggestion(patient_data):
 
+    # 1. Run dictionary suggestion
     suggestion = predictor.suggest_treatment(patient_data)
 
     patient_data["suggested_disease"] = suggestion["disease"]
@@ -187,14 +188,32 @@ def add_treatment_suggestion(patient_data):
     patient_data["match_ratio"] = suggestion["match_ratio"]
     patient_data["suggested_treatment"] = suggestion["treatment"]
 
+    # 2. Run ML top-3 predictions
+    try:
+        top3 = predictor.predict_top3_hierarchical(patient_data)
+        patient_data["top3_predictions"] = [{"disease": d, "probability": float(p)} for d, p in top3]
+    except Exception as e:
+        print(f"Error predicting top3: {e}")
+        patient_data["top3_predictions"] = []
+
+
+    # 3. Run risk triaging
+    risk_info = predictor.triage_patient_risk(patient_data)
+    patient_data["risk_level"] = risk_info["level"]
+    patient_data["triage_message"] = risk_info["message"]
+    patient_data["actionable_steps"] = risk_info["steps"]
+
     print("\nSymptom Match Result\n")
     print(f"Best Matching Disease: {suggestion['disease']}")
     print(f"Matched Symptoms: {', '.join(suggestion['matched_symptoms']) if suggestion['matched_symptoms'] else 'None'}")
     print(f"Match Count: {suggestion['match_count']}")
     print(f"Match Ratio: {suggestion['match_ratio']:.3f}")
     print(f"Suggested Treatment: {suggestion['treatment']}")
+    print(f"Risk Level: {patient_data['risk_level']}")
+    print(f"Triage Message: {patient_data['triage_message']}")
 
     return patient_data
+
 
 
 def collect_patient_context():

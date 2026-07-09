@@ -236,8 +236,25 @@
                     <div class="results-card diagnosis-details">
                         <h3><i class="fa-solid fa-stethoscope"></i> AI Diagnosis & Triage</h3>
                         
-                        <div class="prediction-highlight">
-                            <span class="prediction-label">Primary Suspected Disease</span>
+                        <!-- Triage Risk Level Banner -->
+                        <div class="triage-banner" id="res-triage-banner">
+                            <div class="triage-badge" id="res-risk-badge">
+                                <i class="fa-solid fa-circle-exclamation"></i> <span id="res-risk-level">Calculating...</span> Risk
+                            </div>
+                            <p class="triage-msg" id="res-triage-message">-</p>
+                        </div>
+
+                        <!-- Top 3 ML Predictions -->
+                        <div class="result-block">
+                            <h4>Top 3 ML Predicted Conditions</h4>
+                            <div class="predictions-list" id="res-predictions-list">
+                                <!-- Dynamically populated predictions -->
+                            </div>
+                        </div>
+
+                        <!-- Primary Dictionary Match -->
+                        <div class="prediction-highlight" style="margin-top: 15px;">
+                            <span class="prediction-label">Primary Suspected Disease (Clinical Guideline Match)</span>
                             <div class="disease-name" id="res-disease">Calculating...</div>
                             <div class="match-ratio-bar">
                                 <div class="bar-fill" id="res-match-fill" style="width: 0%"></div>
@@ -253,8 +270,14 @@
                             <p class="symptoms-list" id="res-symptoms">None</p>
                         </div>
 
+                        <!-- Actionable Next Steps -->
+                        <div class="actionable-box" id="res-actionable-box">
+                            <h4><i class="fa-solid fa-circle-info"></i> Actionable Next Steps</h4>
+                            <p id="res-actionable-steps">-</p>
+                        </div>
+
                         <div class="result-block treatment-box">
-                            <h4><i class="fa-solid fa-hand-holding-medical"></i> Suggested Treatment Path</h4>
+                            <h4><i class="fa-solid fa-hand-holding-medical"></i> Suggested Treatment Guideline</h4>
                             <p id="res-treatment">-</p>
                         </div>
                     </div>
