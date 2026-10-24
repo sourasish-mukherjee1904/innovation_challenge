@@ -1,7 +1,40 @@
-.env
+# Byte-compiled / optimized / DLL files
 __pycache__/
-outputs/
-.DS_Store
-*.pyc
+*.py[cod]
+*$py.class
 
-docs/
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Virtual Environments
+.venv/
+venv/
+ENV/
+env/
+
+# Environment Variables and Credentials
+.env
+.env.*
+!.env.example
+*.env
+
+# Runtime Application Artifacts & Triage Dumps
+outputs/
+.patient.json
+*.log
+
+# Editor and IDE configurations
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Large datasets cache (if downloaded locally)
+*.csv
+!examples/*.csv

@@ -5,12 +5,40 @@ import pickle
 import sys
 from sklearn.ensemble import RandomForestClassifier
 
-# Path to the Kaggle dataset
-path = r"C:\Users\sayak\.cache\kagglehub\datasets\dhivyeshrk\diseases-and-symptoms-dataset\versions\1"
-csv_file = os.path.join(path, "Final_Augmented_dataset_Diseases_and_Symptoms.csv")
+def resolve_dataset_path():
+    env_path = os.environ.get("KAGGLE_DATASET_CSV")
+    if env_path and os.path.exists(env_path):
+        return env_path
 
-if not os.path.exists(csv_file):
-    print("Error: CSV dataset not found.")
+    candidates = [
+        "Final_Augmented_dataset_Diseases_and_Symptoms.csv",
+        os.path.join("data", "Final_Augmented_dataset_Diseases_and_Symptoms.csv"),
+        os.path.expanduser("~/.cache/kagglehub/datasets/dhivyeshrk/diseases-and-symptoms-dataset/versions/1/Final_Augmented_dataset_Diseases_and_Symptoms.csv"),
+        r"C:\Users\sayak\.cache\kagglehub\datasets\dhivyeshrk\diseases-and-symptoms-dataset\versions\1\Final_Augmented_dataset_Diseases_and_Symptoms.csv"
+    ]
+    for c in candidates:
+        if os.path.exists(c):
+            return c
+
+    try:
+        import kagglehub
+        path = kagglehub.dataset_download("dhivyeshrk/diseases-and-symptoms-dataset")
+        candidate = os.path.join(path, "Final_Augmented_dataset_Diseases_and_Symptoms.csv")
+        if os.path.exists(candidate):
+            return candidate
+    except Exception:
+        pass
+
+    return None
+
+csv_file = resolve_dataset_path()
+
+if not csv_file or not os.path.exists(csv_file):
+    print("Error: Kaggle CSV dataset not found.")
+    print("To train the hierarchical model:")
+    print("  1. Set the KAGGLE_DATASET_CSV environment variable: export KAGGLE_DATASET_CSV=/path/to/Final_Augmented_dataset_Diseases_and_Symptoms.csv")
+    print("  2. Or download via kagglehub: python -c 'import kagglehub; kagglehub.dataset_download(\"dhivyeshrk/diseases-and-symptoms-dataset\")'")
+    print("  3. Or place the CSV file in the project root or data/ directory.")
     sys.exit(1)
 
 print("Loading dataset...")

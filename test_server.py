@@ -1,7 +1,52 @@
+import os
 import requests
 import sys
 
-BASE_URL = "http://127.0.0.1:5000"
+PORT = int(os.environ.get("PORT", 5000))
+BASE_URL = f"http://127.0.0.1:{PORT}"
+
+def test_with_flask_client(onboarding_data):
+    print("\n[Notice] No live HTTP server detected at BASE_URL.")
+    print("[*] Running API test suite using Flask Test Client (in-process)...")
+    from server import app
+    client = app.test_client()
+
+    # 1. Start Session
+    print("\n[1/3] POST /api/start-session ...")
+    resp = client.post("/api/start-session", json=onboarding_data)
+    print(f"Status Code: {resp.status_code}")
+    assert resp.status_code == 200, f"Start session failed: {resp.data}"
+    data = resp.get_json()
+    assert data.get("success"), f"Session start returned success=False: {data}"
+    session_id = data.get("session_id")
+    print(f"[+] Session started successfully! ID: {session_id}")
+    print(f"Doctor: {data.get('message')}")
+
+    # 2. Send Chat Message
+    print("\n[2/3] POST /api/chat ...")
+    chat_payload = {
+        "session_id": session_id,
+        "message": "I have been experiencing a high fever and severe headache for the past 2 days."
+    }
+    resp = client.post("/api/chat", json=chat_payload)
+    print(f"Status Code: {resp.status_code}")
+    assert resp.status_code == 200, f"Chat request failed: {resp.data}"
+    data = resp.get_json()
+    print(f"Doctor: {data.get('message')}")
+
+    # 3. Finalize Session
+    print("\n[3/3] POST /api/finalize ...")
+    resp = client.post("/api/finalize", json={"session_id": session_id})
+    print(f"Status Code: {resp.status_code}")
+    assert resp.status_code == 200, f"Finalize request failed: {resp.data}"
+    data = resp.get_json()
+    assert data.get("finished"), f"Finalize did not finish correctly: {data}"
+    print("\n[+] Triage Complete!")
+    print(f"Target Disease: {data['patient_data'].get('suggested_disease')}")
+    print(f"Match Ratio: {data['patient_data'].get('match_ratio')}")
+    print(f"Suggested Treatment: {data['patient_data'].get('suggested_treatment')}")
+    print("==================================================")
+    print("Test Passed successfully via Flask Test Client!")
 
 def test_health_triage_flow():
     print("==================================================")
@@ -22,11 +67,10 @@ def test_health_triage_flow():
     start_url = f"{BASE_URL}/api/start-session"
     print(f"\n[1/3] POST {start_url} ...")
     try:
-        response = requests.post(start_url, json=onboarding_data)
+        response = requests.post(start_url, json=onboarding_data, timeout=5)
     except requests.exceptions.ConnectionError:
-        print(f"[-] Error: Could not connect to Flask server at {BASE_URL}.")
-        print("Please make sure server.py is running!")
-        sys.exit(1)
+        test_with_flask_client(onboarding_data)
+        return
         
     print(f"Status Code: {response.status_code}")
     print(f"Response Headers: {response.headers.get('Content-Type')}")

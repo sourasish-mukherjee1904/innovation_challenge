@@ -1,7 +1,15 @@
 import os
 import json
-import ollama
-from groq import Groq
+
+try:
+    import ollama
+except ImportError:
+    ollama = None
+
+try:
+    from groq import Groq
+except ImportError:
+    Groq = None
 
 # Load environment variables
 try:
@@ -18,8 +26,12 @@ OLLAMA_MODEL = "llama3.1:8b"
 # Configure Groq (Fallback)
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
 groq_client = None
-if GROQ_API_KEY:
-    groq_client = Groq(api_key=GROQ_API_KEY)
+if GROQ_API_KEY and Groq is not None:
+    try:
+        groq_client = Groq(api_key=GROQ_API_KEY)
+    except Exception as e:
+        print(f"[!] Warning: Failed to initialize Groq client: {e}")
+        groq_client = None
 GROQ_MODEL = "llama-3.3-70b-versatile"
 
 
@@ -59,17 +71,19 @@ class HealthConversation:
         assistant_reply = None
 
         # 1. Try Ollama (Primary)
-        try:
-            response = ollama.chat(
-                model=OLLAMA_MODEL,
-                messages=self.messages
-            )
-            assistant_reply = response["message"]["content"]
-            print("[+] Query completed successfully using local Ollama.")
-        except Exception as e_ollama:
-            print(f"[!] Ollama failed or not running ({e_ollama}). Trying Groq fallback...")
-            
-            # 2. Try Groq (Secondary Fallback)
+        if ollama is not None:
+            try:
+                response = ollama.chat(
+                    model=OLLAMA_MODEL,
+                    messages=self.messages
+                )
+                assistant_reply = response["message"]["content"]
+                print("[+] Query completed successfully using local Ollama.")
+            except Exception as e_ollama:
+                print(f"[!] Ollama failed or not running ({e_ollama}). Trying Groq fallback...")
+
+        # 2. Try Groq (Secondary Fallback) or Offline Mock Assistant
+        if assistant_reply is None:
             if groq_client:
                 try:
                     response = groq_client.chat.completions.create(

@@ -5,6 +5,35 @@ import pandas as pd
 import numpy as np
 from predictor import DiseasePredictor
 
+def resolve_dataset_path():
+    # 1. Environment variable override
+    env_path = os.environ.get("KAGGLE_DATASET_CSV")
+    if env_path and os.path.exists(env_path):
+        return env_path
+
+    # 2. Local workspace and system cache candidates
+    candidates = [
+        "Final_Augmented_dataset_Diseases_and_Symptoms.csv",
+        os.path.join("data", "Final_Augmented_dataset_Diseases_and_Symptoms.csv"),
+        os.path.expanduser("~/.cache/kagglehub/datasets/dhivyeshrk/diseases-and-symptoms-dataset/versions/1/Final_Augmented_dataset_Diseases_and_Symptoms.csv"),
+        r"C:\Users\sayak\.cache\kagglehub\datasets\dhivyeshrk\diseases-and-symptoms-dataset\versions\1\Final_Augmented_dataset_Diseases_and_Symptoms.csv"
+    ]
+    for c in candidates:
+        if os.path.exists(c):
+            return c
+
+    # 3. Dynamic kagglehub resolution if installed
+    try:
+        import kagglehub
+        path = kagglehub.dataset_download("dhivyeshrk/diseases-and-symptoms-dataset")
+        candidate = os.path.join(path, "Final_Augmented_dataset_Diseases_and_Symptoms.csv")
+        if os.path.exists(candidate):
+            return candidate
+    except Exception:
+        pass
+
+    return None
+
 def test_vignettes():
     print("==================================================")
     print("Executing Clinical Vignettes Validation (50+ Cases)")
@@ -12,12 +41,14 @@ def test_vignettes():
     
     predictor = DiseasePredictor()
     
-    # Path to the Kaggle dataset
-    path = r"C:\Users\sayak\.cache\kagglehub\datasets\dhivyeshrk\diseases-and-symptoms-dataset\versions\1"
-    data_csv = os.path.join(path, "Final_Augmented_dataset_Diseases_and_Symptoms.csv")
+    data_csv = resolve_dataset_path()
     
-    if not os.path.exists(data_csv):
-        print(f"[-] Error: Kaggle dataset CSV not found at {data_csv}")
+    if not data_csv or not os.path.exists(data_csv):
+        print("[-] Dataset CSV not found.")
+        print("[-] To run evaluations on the Kaggle dataset:")
+        print("    1. Set the KAGGLE_DATASET_CSV environment variable: export KAGGLE_DATASET_CSV=/path/to/Final_Augmented_dataset_Diseases_and_Symptoms.csv")
+        print("    2. Or download via kagglehub: python -c 'import kagglehub; kagglehub.dataset_download(\"dhivyeshrk/diseases-and-symptoms-dataset\")'")
+        print("    3. Or place the CSV file in the project root or data/ directory.")
         sys.exit(1)
         
     df = pd.read_csv(data_csv)

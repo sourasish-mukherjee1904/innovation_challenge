@@ -30,5 +30,5 @@
     ],
     "risk_level": "Moderate",
     "triage_message": "Your symptoms and patient profile suggest a moderate concern. Clinical consultation is recommended soon.",
-    "actionable_steps": "\u26a0\ufe0f **RECOMMENDED ACTIONS:**\n1. **Visit your local healthcare clinic** or consult with your village health worker (ASHA/ANM) within the next 24-48 hours.\n2. **Keep hydrated** (drink clean boiled water, or ORS if experiencing diarrhea/vomiting) and rest.\n3. **Monitor your symptoms closely**. If you develop difficulty breathing or chest pain, seek emergency care immediately."
+    "actionable_steps": "⚠️ **RECOMMENDED ACTIONS:**\n1. **Visit your local healthcare clinic** or consult with your village health worker (ASHA/ANM) within the next 24-48 hours.\n2. **Keep hydrated** (drink clean boiled water, or ORS if experiencing diarrhea/vomiting) and rest.\n3. **Monitor your symptoms closely**. If you develop difficulty breathing or chest pain, seek emergency care immediately."
 }
